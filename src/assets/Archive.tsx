@@ -36,6 +36,8 @@ export default function Archive() {
       setEmail(savedEmail);
       checkSubscription(savedEmail);
     }
+
+    localStorage.deleteItem(email);
     
     setLoading(false);
     document.title = `Archives | Niche, Holy Tech`;
