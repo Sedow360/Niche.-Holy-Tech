@@ -159,6 +159,13 @@ export default function Archive() {
     }
   };
 
+  const handleChangeAccount = () => {
+    localStorage.removeItem('subscriberEmail');
+    setIsSubscribed(false);
+    setEmail('');
+    setNotSubscribed(false);
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -255,13 +262,32 @@ export default function Archive() {
         {theme === 'dark' ? '☀️' : '🌙'}
       </button>
 
+      {/* Change Account button */}
+      <button 
+        onClick={handleChangeAccount}
+        style={{ 
+          position: 'absolute', 
+          top: 20, 
+          right: 180,  // Position it left of unsubscribe button
+          padding: '8px 16px',
+          backgroundColor: '#6c757d',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          fontSize: '14px',
+        }}
+      >
+      Change Account
+      </button>
+
       {/* Add Unsubscribe button */}
       <button 
         onClick={handleUnsubscribe}
         style={{ 
           position: 'absolute', 
           top: 20, 
-          right: 70,  // Position it left of theme button
+          right: 70,
           padding: '8px 16px',
           backgroundColor: '#dc3545',
           color: '#fff',
