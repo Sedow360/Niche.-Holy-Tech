@@ -11,7 +11,7 @@ interface Post {
 
 const API = {
   checkSub: "https://yl3unq3toivpvqyg5uvmqdsdlq0spmao.lambda-url.us-east-1.on.aws/",
-  listPosts: "https://xb7axhfvx3iavilpqwggprjvme0isreh.lambda-url.us-east-1.on.aws/",
+  listPosts: "https://m576x5sgc6uxmh57j4umisjftm0cscbf.lambda-url.us-east-1.on.aws/",
   addSub: "https://3zholoxsyh32sc2h7fgz5hjjpm0zvzgt.lambda-url.us-east-1.on.aws/",
   unSub: "https://rqmxrmya7qyhbc32n7fezvmyq40kizbd.lambda-url.us-east-1.on.aws/"
 };
