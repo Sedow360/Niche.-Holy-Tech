@@ -12,7 +12,7 @@ interface Post {
 }
 
 const API = {
-  listPosts: "https://xb7axhfvx3iavilpqwggprjvme0isreh.lambda-url.us-east-1.on.aws/",
+  listPosts: "https://m576x5sgc6uxmh57j4umisjftm0cscbf.lambda-url.us-east-1.on.aws/",
   getPost: "https://avhz7ybe7ynb6b6vrofteorkbe0hqtia.lambda-url.us-east-1.on.aws/",
 };
 
