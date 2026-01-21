@@ -599,7 +599,6 @@ export default function AdminDashboard() {
 
       {activeTab === 'posts' && (
         <div style={styles.content}>
-          <h2 style={styles.sectionTitle}>Your Posts</h2>
           <div style={{ 
               display: 'flex', 
               justifyContent: 'space-between', 
