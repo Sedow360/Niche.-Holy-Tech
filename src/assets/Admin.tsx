@@ -20,6 +20,8 @@ interface Subscriber {
   id: string;
 }
 
+type SortOption = 'latest' | 'oldest' | 'longest' | 'shortest';
+
 // API Configuration
 const API = {
   adminAuth: "https://4sbs43rmtb37sfmitzuxoarqoi0wbibv.lambda-url.us-east-1.on.aws/",
@@ -274,6 +276,7 @@ export default function AdminDashboard() {
   const [status, setStatus] = useState<'published' | 'draft'>('published');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [sortBy, setSortBy] = useState<SortOption>('latest');
   const [posts, setPosts] = useState<Post[]>([]);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [activeTab, setActiveTab] = useState<'write' | 'posts' | 'subscribers'>('write');
@@ -440,31 +443,47 @@ export default function AdminDashboard() {
     setMessage(`✏️ Editing: ${post.title}`);
   };
 
-const handleDelete = async (slug: string) => {
-  if (!confirm(`Delete post "${slug}"?`)) return;
+  const handleDelete = async (slug: string) => {
+    if (!confirm(`Delete post "${slug}"?`)) return;
 
-  try {
-    console.log('Deleting:', slug);
+    try {
+      console.log('Deleting:', slug);
     
-    const response = await fetch(API.deletePost, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ slug })
-    });
-    const text = await response.text();
-    const data = JSON.parse(text);
+      const response = await fetch(API.deletePost, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug })
+      });
+      const text = await response.text();
+      const data = JSON.parse(text);
     
-    if (data.success) {
-      setMessage('✅ Post deleted');
-      await loadPosts();
-    } else {
-      setMessage(`❌ ${data.error || 'Failed to delete'}`);
+      if (data.success) {
+        setMessage('✅ Post deleted');
+        await loadPosts();
+      } else {
+        setMessage(`❌ ${data.error || 'Failed to delete'}`);
+      }
+    } catch (error) {
+      console.error('Delete error:', error);
+      setMessage('❌ Error deleting post');
     }
-  } catch (error) {
-    console.error('Delete error:', error);
-    setMessage('❌ Error deleting post');
-  }
-};
+  };
+
+  // Sort posts based on selected option
+  const sortedPosts = [...posts].sort((a, b) => {
+    switch(sortBy) {
+      case 'latest':
+        return new Date(b.publishedAt || b.createdAt).getTime() - new Date(a.publishedAt || a.createdAt).getTime();
+      case 'oldest':
+        return new Date(a.publishedAt || a.createdAt).getTime() - new Date(b.publishedAt || b.createdAt).getTime();
+      case 'longest':
+        return (b.content?.length || 0) - (a.content?.length || 0);
+      case 'shortest':
+        return (a.content?.length || 0) - (b.content?.length || 0);
+      default:
+        return 0;
+    }
+  });
 
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
@@ -581,11 +600,36 @@ const handleDelete = async (slug: string) => {
       {activeTab === 'posts' && (
         <div style={styles.content}>
           <h2 style={styles.sectionTitle}>Your Posts</h2>
+          <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              marginBottom: '20px'
+            }}>
+            <h2 style={styles.sectionTitle}>Your Posts</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <label style={{ fontSize: '14px', color: '#999' }}>Sort by:</label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              style={{
+                ...styles.select,
+                padding: '8px 12px',
+                fontSize: '14px',
+              }}
+            >
+              <option value="latest">Latest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="longest">Longest First</option>
+              <option value="shortest">Shortest First</option>
+            </select>
+          </div>
+        </div>
           {posts.length === 0 ? (
             <p style={styles.emptyState}>No posts yet. Write your first one! ✍️</p>
           ) : (
             <div style={styles.list}>
-              {posts.map(post => (
+              {sortedPosts.map(post => (
                 <div key={post.slug} style={styles.listItem}>
                   <div style={styles.postInfo}>
                     <h3 style={styles.postTitle}>{post.title}</h3>

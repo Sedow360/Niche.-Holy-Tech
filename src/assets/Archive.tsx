@@ -9,6 +9,8 @@ interface Post {
   tags: string[];
 }
 
+type SortOption = 'latest' | 'oldest' | 'longest' | 'shortest';
+
 const API = {
   checkSub: "https://yl3unq3toivpvqyg5uvmqdsdlq0spmao.lambda-url.us-east-1.on.aws/",
   listPosts: "https://m576x5sgc6uxmh57j4umisjftm0cscbf.lambda-url.us-east-1.on.aws/",
@@ -25,6 +27,7 @@ export default function Archive() {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [notSubscribed, setNotSubscribed] = useState<boolean>(false);
   const [subscribing, setSubscribing] = useState<boolean>(false);
+  const [sortBy, setSortBy] = useState<SortOption>('latest');
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as 'dark' | 'light';
@@ -166,6 +169,22 @@ export default function Archive() {
     setNotSubscribed(false);
   };
 
+  // Sort posts based on selected option
+  const sortedPosts = [...posts].sort((a, b) => {
+    switch(sortBy) {
+      case 'latest':
+        return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+      case 'oldest':
+        return new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime();
+      case 'longest':
+        return (b.excerpt?.length || 0) - (a.excerpt?.length || 0);
+      case 'shortest':
+        return (a.excerpt?.length || 0) - (b.excerpt?.length || 0);
+      default:
+        return 0;
+    }
+  });
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -268,7 +287,7 @@ export default function Archive() {
         style={{ 
           position: 'absolute', 
           top: 20, 
-          right: 200,  // Position it left of unsubscribe button
+          right: 200,
           padding: '8px 16px',
           backgroundColor: '#6c757d',
           color: '#fff',
@@ -281,7 +300,7 @@ export default function Archive() {
       Change Account
       </button>
 
-      {/* Add Unsubscribe button */}
+      {/* Unsubscribe button */}
       <button 
         onClick={handleUnsubscribe}
         style={{ 
@@ -300,8 +319,40 @@ export default function Archive() {
         Unsubscribe
       </button>
       
-      <h1 style={{ textAlign: 'center', marginBottom: '40px' }}>📚 Archive</h1>
+      <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>📚 Archive</h1>
       
+      {/* Sort Dropdown */}
+      <div style={{ 
+        maxWidth: '1200px', 
+        margin: '0 auto 30px auto',
+        display: 'flex',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        gap: '10px'
+      }}>
+        <label htmlFor="sort-select" style={{ fontSize: '14px' }}>Sort by:</label>
+        <select
+          id="sort-select"
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as SortOption)}
+          style={{
+            padding: '8px 12px',
+            backgroundColor: theme === 'dark' ? '#333' : '#f5f5f5',
+            color: theme === 'dark' ? '#fff' : '#000',
+            border: '1px solid #444',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '14px',
+          }}
+        >
+          <option value="latest">Latest First</option>
+          <option value="oldest">Oldest First</option>
+          <option value="longest">Longest First</option>
+          <option value="shortest">Shortest First</option>
+        </select>
+      </div>
+
+      {/* Posts Grid */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
@@ -309,7 +360,7 @@ export default function Archive() {
         maxWidth: '1200px',
         margin: '0 auto'
       }}>
-        {posts.map(post => (
+        {sortedPosts.map(post => (
           <a
             key={post.slug}
             href={`/post/${post.slug}`}
